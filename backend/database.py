@@ -17,3 +17,11 @@ def get_schema():
 
     connection.close()
     return schema
+
+def run_query(sql_query):
+    connection = sqlite3.connect(db_path)
+    cursor = connection.cursor()
+    cursor.execute(sql_query)
+    rows = cursor.fetchall()
+    connection.close()
+    return rows
