@@ -20,9 +20,10 @@ def get_schema():
     return schema
 
 def run_query(sql_query):
+    print(repr(sql_query))
     if not sql_query.strip().lower().startswith("select"):
         raise ValueError("Only SELECT queries are allowed.")
-    connection = sqlite3.connect(db_path)
+    connection = sqlite3.connect(f"file:{db_path}?mode=ro", uri=True)
     cursor = connection.cursor()
     cursor.execute(sql_query)
     rows = cursor.fetchall()

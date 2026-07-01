@@ -14,6 +14,14 @@ class QueryRequest(BaseModel):
 
 app = FastAPI()
 
+def strip_markdown_fence(sql_query: str) -> str:
+    sql_query = sql_query.strip()
+    if sql_query.startswith("```") and sql_query.endswith("```"):
+        lines = sql_query.split("\n")
+        lines = lines[1:-1]  # drop first and last line
+        return "\n".join(lines)
+    return sql_query
+
 @app.post("/query")
 def query(request: QueryRequest):
     schema = get_schema()
@@ -32,6 +40,8 @@ def query(request: QueryRequest):
     )
 
     sql = message.content[0].text          # extract the SQL text from Claude's response
+    sql = strip_markdown_fence(sql)  # checks and removes markdown formatting
+    
     try:
         results = run_query(sql)
     except ValueError as e:
