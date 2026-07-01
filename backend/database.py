@@ -1,6 +1,7 @@
 import sqlite3
 from pathlib import Path
 
+
 BASE_DIR = Path(__file__).parent
 db_path = BASE_DIR / "spotify.db"
 
@@ -19,6 +20,8 @@ def get_schema():
     return schema
 
 def run_query(sql_query):
+    if not sql_query.strip().lower().startswith("select"):
+        raise ValueError("Only SELECT queries are allowed.")
     connection = sqlite3.connect(db_path)
     cursor = connection.cursor()
     cursor.execute(sql_query)

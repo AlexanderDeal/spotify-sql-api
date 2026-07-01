@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from database import get_schema, run_query
 from dotenv import load_dotenv
@@ -32,6 +32,9 @@ def query(request: QueryRequest):
     )
 
     sql = message.content[0].text          # extract the SQL text from Claude's response
-    results = run_query(sql)               # run it against the database
+    try:
+        results = run_query(sql)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
     return {"sql": sql, "results": results}
