@@ -4,6 +4,7 @@ from database import get_schema, run_query
 from dotenv import load_dotenv
 import os
 import anthropic
+from fastapi.middleware.cors import CORSMiddleware
 
 load_dotenv()
 
@@ -13,6 +14,14 @@ class QueryRequest(BaseModel):
     question: str
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 def strip_markdown_fence(sql_query: str) -> str:
     sql_query = sql_query.strip()
