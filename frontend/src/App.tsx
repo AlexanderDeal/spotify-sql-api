@@ -5,9 +5,11 @@ function App() {
   const [results, setResults] = useState<any[][]>([]);
   const [error, setError] = useState("");
   const [sql, setSql] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleClick = async () => {
   const apiUrl = import.meta.env.VITE_API_URL;
+  setIsLoading(true);
 
   try {
     const response = await fetch(`${apiUrl}/query`, {
@@ -26,9 +28,13 @@ function App() {
     setError("");
     setSql(data.sql);
     setResults(data.results);
+
   } catch (err) {
     setError("Could not reach the server");
     setResults([]);
+
+  } finally {
+    setIsLoading(false);
   }
 };
 
@@ -38,7 +44,9 @@ function App() {
       value={question}
       onChange={(e) => setQuestion(e.target.value)}
     />
-    <button onClick={handleClick}>Submit</button>
+    <button onClick={handleClick} disabled={isLoading}>
+      {isLoading ? "Loading..." : "Submit"}
+    </button>
 
     <table>
       <tbody>
@@ -51,11 +59,11 @@ function App() {
         ))}
       </tbody>
     </table>
-
+    
     {sql && (
       <pre>{sql}</pre>
     )}
-    
+
     {error && <p style={{ color: "red" }}>{error}</p>}
 
     </>
