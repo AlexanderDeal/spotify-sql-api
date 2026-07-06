@@ -1,4 +1,3 @@
-from multiprocessing.dummy import connection
 import sqlite3
 from pathlib import Path
 
@@ -20,7 +19,7 @@ def get_schema():
     connection.close()
     return schema
 
-def run_query(sql_query):
+def run_query(sql_query, limit=200):
     if not sql_query.strip().lower().startswith("select"):
         raise ValueError("Only SELECT queries are allowed.")
     connection = sqlite3.connect(f"file:{db_path}?mode=ro", uri=True)
@@ -29,9 +28,12 @@ def run_query(sql_query):
     try:
         cursor.execute(sql_query)
         rows = cursor.fetchall()
+        total_count = len(rows)
+        limit = min(limit, 1000)  # enforce a maximum limit of 1000 rows
+        rows = rows[:limit]
     except sqlite3.Error as e:
         raise ValueError(f"SQL error: {e}")
     finally:
         connection.close()
         
-    return rows
+    return rows, total_count
