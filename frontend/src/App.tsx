@@ -4,6 +4,7 @@ function App() {
   const [question, setQuestion] = useState("");
   const [results, setResults] = useState<any[][]>([]);
   const [error, setError] = useState("");
+  const [sql, setSql] = useState("");
 
   const handleClick = async () => {
   const apiUrl = import.meta.env.VITE_API_URL;
@@ -23,6 +24,7 @@ function App() {
     }
 
     setError("");
+    setSql(data.sql);
     setResults(data.results);
   } catch (err) {
     setError("Could not reach the server");
@@ -50,7 +52,12 @@ function App() {
       </tbody>
     </table>
 
+    {sql && (
+      <pre>{sql}</pre>
+    )}
+    
     {error && <p style={{ color: "red" }}>{error}</p>}
+
     </>
   );
 }
