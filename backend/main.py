@@ -49,12 +49,12 @@ def query(request: QueryRequest):
         messages=[{"role": "user", "content": prompt}]
     )
 
-    sql = message.content[0].text    # extract the SQL text from Claude's response
+    sql = next(block.text for block in message.content if block.type == "text")    # extract the SQL text from Claude's response
     sql = strip_markdown_fence(sql)  # checks and removes markdown formatting
     
     try:
-        results, total_count = run_query(sql, request.limit)
+        results, total_count, column_names = run_query(sql, request.limit)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-    return {"sql": sql, "results": results, "total_count": total_count}
+    return {"sql": sql, "results": results, "total_count": total_count, "column_names": column_names}

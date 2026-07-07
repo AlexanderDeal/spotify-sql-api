@@ -23,8 +23,11 @@
   border-radius: 4px;
 }
 
+.table-wrapper {
+  overflow-x: auto;
+}
+
 .results-table {
-  width: 100%;
   border-collapse: collapse;
   margin-top: 16px;
 }
@@ -33,6 +36,7 @@
   border: 1px solid #ccc;
   padding: 8px;
   text-align: left;
+  white-space: nowrap;
 }
 
 .sql-output {

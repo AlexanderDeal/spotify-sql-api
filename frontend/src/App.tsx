@@ -9,6 +9,7 @@ function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [limit, setLimit] = useState(200);
   const [totalCount, setTotalCount] = useState(0);
+  const [columns, setColumns] = useState<string[]>([]);
 
   const handleClick = async () => {
     const apiUrl = import.meta.env.VITE_API_URL;
@@ -25,17 +26,20 @@ function App() {
       if (!response.ok) {
         setError(data.detail);
         setResults([]);
+        setColumns([]);
         return;
       }
 
       setError("");
       setSql(data.sql);
+      setColumns(data.column_names);
       setResults(data.results);
       setTotalCount(data.total_count);
 
     } catch (err) {
       setError("Could not reach the server");
       setResults([]);
+      setColumns([]);
 
     } finally {
       setIsLoading(false);
@@ -71,21 +75,28 @@ function App() {
         <pre className="sql-output">{sql}</pre>
       )}
 
-      <table className="results-table">
-        <tbody>
-          {results.map((row, index) => (
-            <tr key={index}>
-              {row.map((cell, i) => (
-                <td key={i}>{cell}</td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <div className="table-wrapper">
+        <table className="results-table">
+          <thead>
+            <tr>
+              {columns.map((col, i) => <th key={i}>{col}</th>)}
+              </tr>
+          </thead>
+          <tbody>
+            {results.map((row, index) => (
+              <tr key={index}>
+                {row.map((cell, i) => (
+                  <td key={i}>{cell}</td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
 
-      {error && <p className="error">
-        {error}
-      </p>}
+        {error && <p className="error">
+          {error}
+        </p>}
+      </div>
 
     </div>
   );
