@@ -11,6 +11,11 @@ function App() {
   const [totalCount, setTotalCount] = useState(0);
   const [columns, setColumns] = useState<string[]>([]);
   const [conversation, setConversation] = useState<{question: string, sql: string}[]>([]);
+  const exampleQuestions = [
+    "What are the 10 most popular tracks?",
+    "Show me the newest song by Taylor Swift.",
+    "What's the average track duration?",
+  ];
 
   const handleClick = async () => {
     const apiUrl = import.meta.env.VITE_API_URL;
@@ -55,10 +60,24 @@ function App() {
         className="question-input"
         value={question}
         onChange={(e) => setQuestion(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            handleClick();
+          }
+        }}
       />
+
       <button onClick={handleClick} disabled={isLoading} className="submit-button">
         {isLoading ? "Loading..." : "Submit"}
       </button>
+
+      <div className="examples">
+        {exampleQuestions.map((q, i) => (
+          <button key={i} onClick={() => setQuestion(q)} className="example-chip">
+            {q}
+          </button>
+        ))}
+      </div>
 
       <div className="limit-container">
         <label htmlFor="limit-input">Max rows:</label>

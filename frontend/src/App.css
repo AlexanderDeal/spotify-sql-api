@@ -14,6 +14,27 @@
   border-radius: 4px;
 }
 
+.examples {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.example-chip {
+  background-color: #f0f0f0;
+  color: #333;
+  border: 1px solid #ccc;
+  border-radius: 16px;
+  padding: 6px 12px;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.example-chip:hover {
+  background-color: #e0e0e0;
+}
+
 .limit-input {
   width: 100px;
   padding: 8px;
