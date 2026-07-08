@@ -10,6 +10,7 @@ function App() {
   const [limit, setLimit] = useState(200);
   const [totalCount, setTotalCount] = useState(0);
   const [columns, setColumns] = useState<string[]>([]);
+  const [conversation, setConversation] = useState<{question: string, sql: string}[]>([]);
 
   const handleClick = async () => {
     const apiUrl = import.meta.env.VITE_API_URL;
@@ -19,7 +20,7 @@ function App() {
       const response = await fetch(`${apiUrl}/query`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question: question, limit: limit }),
+        body: JSON.stringify({ question: question, limit: limit, history: conversation }),
       });
       const data = await response.json();
 
@@ -35,6 +36,8 @@ function App() {
       setColumns(data.column_names);
       setResults(data.results);
       setTotalCount(data.total_count);
+      const updatedConversation = [...conversation, { question: question, sql: data.sql }];
+      setConversation(updatedConversation.slice(-10)); // Keep only the last 10 items in the conversation history
 
     } catch (err) {
       setError("Could not reach the server");

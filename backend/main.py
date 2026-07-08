@@ -10,9 +10,14 @@ load_dotenv()
 
 client = anthropic.Anthropic()
 
+class HistoryItem(BaseModel):
+    question: str
+    sql: str
+
 class QueryRequest(BaseModel):
     question: str
     limit: int = 200
+    history: list[HistoryItem] = []
 
 app = FastAPI()
 
@@ -35,9 +40,15 @@ def strip_markdown_fence(sql_query: str) -> str:
 @app.post("/query")
 def query(request: QueryRequest):
     schema = get_schema()
+    history_text = ""
+    for item in request.history:
+        history_text += f"Previous question: {item.question}\nPrevious SQL: {item.sql}\n\n"
     
     prompt = f"""You are a SQL expert. Given this database schema:
     {schema}
+
+    You are given the following conversation history:
+    {history_text}
 
     Write a SQL query to answer this question: {request.question}
 
