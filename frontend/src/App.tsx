@@ -18,6 +18,10 @@ function App() {
   ];
 
   const handleClick = async () => {
+    if (!question.trim()) {
+      setError("Please enter a question.");
+      return;
+    }
     const apiUrl = import.meta.env.VITE_API_URL;
     setIsLoading(true);
 

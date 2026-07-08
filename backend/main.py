@@ -1,10 +1,13 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from pydantic import BaseModel
 from database import get_schema, run_query
 from dotenv import load_dotenv
 import os
 import anthropic
 from fastapi.middleware.cors import CORSMiddleware
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
 
 load_dotenv()
 
@@ -28,7 +31,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Set up rate limiting 
+limiter = Limiter(key_func=get_remote_address)
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
+# Define API endpoints
 def strip_markdown_fence(sql_query: str) -> str:
     sql_query = sql_query.strip()
     if sql_query.startswith("```") and sql_query.endswith("```"):
@@ -38,10 +46,11 @@ def strip_markdown_fence(sql_query: str) -> str:
     return sql_query
 
 @app.post("/query")
-def query(request: QueryRequest):
+@limiter.limit("10/minute")  # Limit to 10 requests per minute
+def query(request: Request, body: QueryRequest):
     schema = get_schema()
     history_text = ""
-    for item in request.history:
+    for item in body.history:
         history_text += f"Previous question: {item.question}\nPrevious SQL: {item.sql}\n\n"
     
     prompt = f"""You are a SQL expert. Given this database schema:
@@ -50,7 +59,7 @@ def query(request: QueryRequest):
     You are given the following conversation history:
     {history_text}
 
-    Write a SQL query to answer this question: {request.question}
+    Write a SQL query to answer this question: {body.question}
 
     Respond with ONLY the SQL query, no explanation, no markdown formatting."""
 
@@ -64,7 +73,7 @@ def query(request: QueryRequest):
     sql = strip_markdown_fence(sql)  # checks and removes markdown formatting
     
     try:
-        results, total_count, column_names = run_query(sql, request.limit)
+        results, total_count, column_names = run_query(sql, body.limit)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
